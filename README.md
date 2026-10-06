@@ -1,6 +1,6 @@
 
 <div align="center">
-  <img src="public/assets/images/icon.png" />
+  <img src="public/icon.png" />
   <h1>DuckProx v4</h1>
 </div>
 A website with tons of games, apps, built-in proxy, emulator, and more fun goodies. If you fork this repository, please consider giving it a star ⭐!
