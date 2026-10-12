@@ -14,24 +14,41 @@ if (/debug/.test(window.location)) {
 }
 
 
+
 const swAllowedHostnames = ['localhost', '127.0.0.1']
 
 async function registerSW() {
-  console.log('Starting registration...')
-  if (location.protocol !== 'https:' && !swAllowedHostnames.includes(location.hostname)) throw new Error('Service workers cannot be registered without https.')
+  console.log('Starting UV service worker registration...')
 
-  if (!navigator.serviceWorker) throw new Error("Your browser doesn't support service workers.")
+  if (
+    location.protocol !== 'https:' &&
+    !swAllowedHostnames.includes(location.hostname)
+  ) {
+    throw new Error('Service workers require HTTPS.')
+  }
 
-  await navigator.serviceWorker
-    .register('sw.js', {
+  if (!('serviceWorker' in navigator)) {
+    throw new Error('Your browser does not support service workers.')
+  }
+
+  try {
+    // Use an absolute path so registration doesn't depend
+    // on the current page's URL.
+    await navigator.serviceWorker.register('/sw.js', {
       scope: __uv$config.prefix
     })
-    .then(() => {
-      console.log('Registered!')
-    })
+
+    await navigator.serviceWorker.ready
+
+    console.log('UV service worker is ready!')
+  } catch (error) {
+    console.error('UV service worker registration failed:', error)
+    throw error
+  }
 }
 
-registerSW()
+registerSW().catch(console.error)
+
 
 // Font Awesome
 const fa = document.createElement('link')
