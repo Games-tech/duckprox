@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Opening proxy…</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 650px; margin: 12vh auto; padding: 24px; }
+    #status { color: #555; }
+  </style>
+  <script src="/uv/uv.bundle.js"></script>
+  <script src="/uv/uv.config.js"></script>
+</head>
+<body>
+  <h1>Opening proxy…</h1>
+  <p id="status">Preparing the proxy for this browser.</p>
+  <script>
+    (async () => {
+      const status = document.getElementById('status');
+      try {
+        if (!('serviceWorker' in navigator)) {
+          throw new Error('This browser does not support service workers.');
+        }
+        const target = new URLSearchParams(location.search).get('url');
+        if (!target) {
+          throw new Error('Missing destination. Add ?url=https%3A%2F%2Fexample.com');
+        }
+        const destination = new URL(target);
+        if (!['http:', 'https:'].includes(destination.protocol)) {
+          throw new Error('Only http and https destinations are supported.');
+        }
+
+        status.textContent = 'Installing the proxy service worker…';
+        await navigator.serviceWorker.register('/sw.js', {
+          scope: __uv$config.prefix
+        });
+        await navigator.serviceWorker.ready;
+
+        // The destination must be navigated to only after registration is active.
+        status.textContent = 'Opening the requested site…';
+        location.replace(__uv$config.prefix + __uv$config.encodeUrl(destination.href));
+      } catch (error) {
+        status.textContent = 'Could not open the proxy: ' + error.message;
+        console.error(error);
+      }
+    })();
+  </script>
+</body>
+</html>
